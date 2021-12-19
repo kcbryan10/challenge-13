@@ -27,15 +27,24 @@ router.get('/:id', (req, res) => {
     where: {
       id: req.params.id
     },
-    include: {
-      model: Product
+    include: [
+      {
+      model: Product,
+      attributes: ['id', 'product_name', 'price', 'stock', 'category_id'],
     }
+  ]
+})
+  .then(tagData => {
+    if (!tagData[0]) {
+      res.status(404).json({ message: 'No tag found with that ID'});
+      return;
+    }
+    res.json(tagData);
   })
-  .then(tagData => res.json(tagData))
   .catch(err => {
     console.log(err);
     res.status(500).json(err);
-  });
+  }); 
 });
 
 router.post('/', (req, res) => {
@@ -54,15 +63,12 @@ router.put('/:id', (req, res) => {
   // update a tag's name by its `id` value
   Tag.update(
     {
-      tag_name: req.body.tag_name
-    },
-    {
       where: {
         id: req.params.id
       }
     })
     .then(tagData => {
-      if (!tagData) {
+      if (!tagData[0]) {
         res.status(404).json({ message: 'No tag found with that ID'});
         return;
       }
